@@ -1,0 +1,11 @@
+out
+node_modules
+.idea
+.tscache
+.DS_Store
+**.js
+**.js.map
+bin/**
+tmp/**
+tests/out/**
+src/.baseDir.ts
