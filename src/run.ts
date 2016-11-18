@@ -73,12 +73,24 @@ var functionList = dataList.map(function(e) {
 	var name = e['name'];
 	var fstr = e['function-body'];
 	var args = []
+	var thisVal;
 
 	try {
-		var arg = e['args'];
-		args.push(eval(arg));
+		thisVal = e['thisVal'];
+		if (thisVal == undefined) {
+			thisVal = null;
+		} else {
+			thisVal = eval(thisVal);
+		}
 	} catch (err) {
-		error('args is not any[][]');
+		error('Could not parse thisVal:\n' + e['thisVal']);
+	}
+
+	try {
+		var arg = [thisVal].concat(eval('[' + e['args'] + ']'));
+		args.push(arg);
+	} catch (err) {
+		error('args is not any[][]:\n' + arg);
 	}
 
 	if (name == undefined) {
@@ -95,10 +107,14 @@ var functionList = dataList.map(function(e) {
 		error('Could not parse function:\n' + fstr);
 	}
 
+	var func = function(self) {
+		f.apply(self, Array.prototype.slice.call(arguments, 1));
+	}
+
 	if (!(f instanceof Function)) {
 		error('Function body is not javascript function:\n' + fstr);
 	}
-	return {'name': name, 'function': f, 'args': args};
+	return {'name': name, 'function': func, 'args': args};
 })
 
 var config = new Search.SearchConfig();
@@ -106,7 +122,12 @@ config.debug = 1;
 
 functionList.map(function (e) {
 	Ansi.Green(e['name']);
-	Search.search(e['function'], e['args'], config);
+	var inputs = Search.search(e['function'], e['args'], config);
+	for (var i = 0; i < inputs.length; i++) {
+		var input = inputs[i];
+		Ansi.Green("thisVal: " + input[0].toString());
+		Ansi.Green("arguments: " + input.slice(1));
+	}
 });
 
 Util.exit(0);

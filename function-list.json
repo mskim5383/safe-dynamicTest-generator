@@ -2,8 +2,9 @@
   "function-list": [
     {
       "name": "Array.prototype.pop",
-      "function-body": "function (arr) {arr.pop();}",
-      "args": "[[1,2,3]]"
+      "function-body": "Array.prototype.pop",
+      "thisVal": "[1, 2, 3]",
+      "args": ""
     }
   ]
 }
