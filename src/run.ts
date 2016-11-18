@@ -46,7 +46,67 @@ var f = function (self, a1, a2, a3) {
 	return Array.prototype.pop.apply(self, [a1, a2, a3])
 }
 var args = [[[1, 2, 3, 4], 2, 3, 4]]
+
+var data
+var dataList
+
+try {
+	data = fs.readFileSync('./function-list.json', 'utf8');
+	dataList = JSON.parse(data)['function-list'];
+} catch (err) {
+	if (err.code === 'ENOENT') {
+		error('function-list.json not found');
+	} else if (err instanceof SyntaxError) {
+		error('Invaild json format');
+	} else {
+		throw err;
+	}
+}
+
+if (dataList == undefined) {
+	error('funcion-list field does not exists');
+} else if (!(dataList instanceof Array)) {
+	error('function-list is not list');
+}
+
+var functionList = dataList.map(function(e) {
+	var name = e['name'];
+	var fstr = e['function-body'];
+	var args = []
+
+	try {
+		var arg = e['args'];
+		args.push(eval(arg));
+	} catch (err) {
+		error('args is not any[][]');
+	}
+
+	if (name == undefined) {
+		error('Function name does not exists:\n' + e.toString());
+	}
+	if (fstr == undefined) {
+		error('Function body does not exists:\n' + e.toString());
+	}
+
+	var f;
+	try {
+		f = eval('(' + fstr + ')');
+	} catch (err) {
+		error('Could not parse function:\n' + fstr);
+	}
+
+	if (!(f instanceof Function)) {
+		error('Function body is not javascript function:\n' + fstr);
+	}
+	return {'name': name, 'function': f, 'args': args};
+})
+
 var config = new Search.SearchConfig();
 config.debug = 1;
-var input = Search.search(f, args, config)
-Util.exit(0)
+
+functionList.map(function (e) {
+	Ansi.Green(e['name']);
+	Search.search(e['function'], e['args'], config);
+});
+
+Util.exit(0);

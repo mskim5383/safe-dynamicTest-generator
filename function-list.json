@@ -1,0 +1,9 @@
+{
+  "function-list": [
+    {
+      "name": "Array.prototype.pop",
+      "function-body": "function (arr) {arr.pop();}",
+      "args": "[[1,2,3]]"
+    }
+  ]
+}
