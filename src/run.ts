@@ -29,6 +29,7 @@ import Data = require('./Data')
 import Search = require('./Search')
 import Recorder = require('./Recorder')
 import StructureInference = require('./StructureInference')
+import TestGen = require('./TestGen')
 var fs = require('fs')
 
 var log = Util.log
@@ -41,11 +42,6 @@ function error(message) {
 }
 
 Random.resetRandomness(-1)
-
-var f = function (self, a1, a2, a3) {
-	return Array.prototype.pop.apply(self, [a1, a2, a3])
-}
-var args = [[[1, 2, 3, 4], 2, 3, 4]]
 
 var data
 var dataList
@@ -69,7 +65,23 @@ if (dataList == undefined) {
 	error('function-list is not list');
 }
 
-var functionList = dataList.map(function(e) {
+var functionList = dataList.map(parseFunction)
+
+var config = new Search.SearchConfig();
+config.debug = 1;
+
+
+var inputSet = functionList.reduce(generateInputSet, []);
+
+var jsonList = inputSet.map(function (test) {
+	var testJson = TestGen.jsonGen(test['func'], test['thisVal'], test['args']);
+	Ansi.Green("test json: " + testJson.toString());
+	return testJson;
+});	
+
+Util.exit(0);
+
+function parseFunction (e) {
 	var name = e['name'];
 	var fstr = e['function-body'];
 	var args = []
@@ -114,20 +126,17 @@ var functionList = dataList.map(function(e) {
 	if (!(f instanceof Function)) {
 		error('Function body is not javascript function:\n' + fstr);
 	}
-	return {'name': name, 'function': func, 'args': args};
-})
+	return {'name': name, 'function': func, 'args': args, 'f': f};
+}
 
-var config = new Search.SearchConfig();
-config.debug = 1;
-
-functionList.map(function (e) {
+function generateInputSet (inputSet, e) {
 	Ansi.Green(e['name']);
 	var inputs = Search.search(e['function'], e['args'], config);
 	for (var i = 0; i < inputs.length; i++) {
 		var input = inputs[i];
 		Ansi.Green("thisVal: " + input[0].toString());
 		Ansi.Green("arguments: " + input.slice(1));
+		inputSet.push({'func': e['f'], 'thisVal': input[0], 'args': input.slice(1)});
 	}
-});
-
-Util.exit(0);
+	return inputSet;
+}
