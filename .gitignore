@@ -9,3 +9,4 @@ bin/**
 tmp/**
 tests/out/**
 src/.baseDir.ts
+.*.swp
