@@ -30,6 +30,7 @@ import Search = require('./Search')
 import Recorder = require('./Recorder')
 import StructureInference = require('./StructureInference')
 import TestGen = require('./TestGen')
+import Score = require('./Score')
 var fs = require('fs')
 
 var log = Util.log
@@ -82,6 +83,8 @@ var config = new Search.SearchConfig()
 
 
 var inputSet = functionList.reduce(generateInputSet, [])
+
+inputSet.map(Score.testInput)
 
 var jsonList = inputSet.map(generateJson)
 
@@ -165,8 +168,10 @@ function generateInputSet (inputSet, e) {
 function generateJson (test) {
   for (var i = 0; i < test.inputs.length; i++) {
     var input = test.inputs[i]
-    var testJson = TestGen.jsonGen(test['f'], input['thisVal'], input['args'])
-    input.json = testJson
+    var testJsonSAFE = TestGen.jsonGen(test['f'], input['thisVal'], input['args'])
+    var testJson = {'name': test.name, 'thisVal': input.thisVal, 'args': input.args}
+    input.json = testJsonSAFE
+    input.testJson = testJson
   }
   return test
 }
@@ -184,9 +189,11 @@ function saveTests (tests_path, test) {
     }
   }
 
+  var tests = []
   for (var i = 0; i < inputs.length; i++) {
     var json_name = name + '_' + i + '.json'
     var input = inputs[i]
+    tests.push(input.testJson)
     try {
       fs.writeFileSync(test_path + json_name, input.json)
       Ansi.Green('Created ' + json_name)
@@ -194,4 +201,27 @@ function saveTests (tests_path, test) {
       Ansi.Red('Could not write test json: ' + json_name)
     }
   }
+  fs.writeFileSync('./test.json', JSON.stringify(tests, null, 4))
 }
+
+// function scoreTestSet (test) {
+//   test.name ... mapping ... (test)
+// }
+// 
+// var mapping = {
+//   'Array.prototype.pop': popScore
+// }
+// 
+// function popScore(tests) {
+//   var check = [];
+//   var total;
+//   function score(thisV, args) {
+//     var len = ToUint32(lenVal);
+//     if (len == 0) check[0] = true;
+//     else check[1] = true;
+//   }
+// 
+//   tests.... score(..., ...)
+//   count = check ...
+//   return count / total;
+// }
