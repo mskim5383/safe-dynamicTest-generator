@@ -20,7 +20,7 @@ export function testInput(testSet) {
 }
 
 export function test(f, args: any) {
-    var fstr = f.toString()
+    var fstr = whileUnroll(f.toString(), 2)
     var fsplit = fstr.split(/{/)
     var len = fsplit.length
 
@@ -44,11 +44,74 @@ export function test(f, args: any) {
         if (_score[i] == 1) {
             scoreNum++
         }
-        // console.log('score[' + i + '] = ' + _score[i])
+            // console.log('score[' + i + '] = ' + _score[i])
     }
 
     return scoreNum / (len - 2)
 }
+
+export function whileUnroll(fstr, depth) {
+    var whileIdx = fstr.search('while')
+    if (whileIdx == -1) {
+        return fstr
+    }
+
+    var idx = whileIdx
+
+
+    while (fstr[idx] != '(') {
+        idx += 1
+    }
+    var startIdx = idx
+
+    idx += 1
+    var cnt = 1
+    while (cnt > 0) {
+        if (fstr[idx] == '(') {
+            cnt += 1
+        } else if (fstr[idx] == ')') {
+            cnt -= 1
+        }
+        idx += 1
+    }
+    var endIdx = idx
+
+    var condition = fstr.substring(startIdx, endIdx + 1)
+
+    while (fstr[idx] != '{') {
+        idx += 1
+    }
+    startIdx = idx
+
+    idx += 1
+    var cnt = 1
+    while (cnt > 0) {
+        if (fstr[idx] == '{') {
+            cnt += 1
+        } else if (fstr[idx] == '}') {
+            cnt -= 1
+        }
+        idx += 1
+    }
+    endIdx = idx
+
+    var fbody = fstr.substring(startIdx + 1, endIdx - 1)
+
+    var newfstr = ''
+    for (var i = 0; i < depth; i++) {
+        newfstr += 'if ' + condition + '{\n' + fbody + '\n'
+    }
+    newfstr += 'while ' + condition + '{\n' + fbody + '\n'
+
+    for (var i = 0; i < depth + 1; i++) {
+        newfstr += '}\n'
+    }
+
+    return fstr.substring(0, whileIdx - 1) + newfstr + whileUnroll(fstr.substring(endIdx + 1), depth)
+}
+
+
+
 
 var ToObject = Builtin.ToObject
 var ToString = Builtin.ToString
