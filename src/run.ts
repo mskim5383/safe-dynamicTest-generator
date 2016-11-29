@@ -110,25 +110,32 @@ function parseFunction (e) {
   var name = e['name']
   var fstr = e['function-body']
   var args = []
-  var thisVal
+  var thisValArr = []
 
-  try {
-    thisVal = e['thisVal']
-    if (thisVal == undefined) {
-      thisVal = null
-    } else {
-      thisVal = eval(thisVal)
+  // try {
+  //   thisVal = e['thisVal']
+  //   if (thisVal == undefined) {
+  //     thisVal = null
+  //   } else {
+  //     thisVal = eval(thisVal)
+  //   }
+  // } catch (err) {
+  //   error('Could not parse thisVal:\n' + e['thisVal'])
+  // }
+
+  for (var i = 0; i < 10; i++) {
+    var thisVal = Random.pickN([-1], 1)[0]
+    if (thisVal == -1) {
+      var t = []
+      for (var j = 0; j < 5; j++) {
+        t.push(Random.pickN([0, 1, -1, Infinity, -Infinity, "b", "def", true, false], 1)[0])
+      }
+      thisValArr.push(t)
     }
-  } catch (err) {
-    error('Could not parse thisVal:\n' + e['thisVal'])
+    else
+      thisValArr.push(thisVal)
   }
 
-  try {
-    var arg = [thisVal].concat(eval('[' + e['args'] + ']'))
-    args.push(arg)
-  } catch (err) {
-    error('args is not any[][]:\n' + arg)
-  }
 
   if (name == undefined) {
     error('Function name does not exists:\n' + e.toString())
@@ -142,6 +149,25 @@ function parseFunction (e) {
     f = eval('(' + fstr + ')')
   } catch (err) {
     error('Could not parse function:\n' + fstr)
+  }
+
+  if (!(f instanceof Function)) {
+    error('function-body is not Function:\n' + fstr)
+  }
+  // try {
+  //   var arg = [thisVal].concat(eval('[' + e['args'] + ']'))
+  //   args.push(arg)
+  // } catch (err) {
+  //   error('args is not any[][]:\n' + arg)
+  // }
+  //
+
+  for (var i = 0; i < 5; i++) {
+    var arg = Util.clone(Random.pickN(thisValArr, 1))
+    for (var j = 0; j < f.length; j++) {
+      arg.push(Random.pickN([0, 1, -1, Infinity, -Infinity, "b", "def", true, false], 1)[0])
+    }
+    args.push(arg)
   }
 
   var func = function(self) {
