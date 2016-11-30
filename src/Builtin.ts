@@ -53,6 +53,10 @@ export function HasProperty(o, p) {
     return p in o
 }
 
+export function IsCallable(f) {
+    return f instanceof Function
+}
+
 // 15.4.4.6 Array.prototype.pop ( )
 // The last element of the array is removed from the array and returned.
 map["Array.prototype.pop"] = function() {
@@ -436,12 +440,18 @@ map["Array.prototype.indexOf"] = function(searchElement, fromIndex) {
   // 3. Let len be ToUint32(lenValue).
   var len = ToUint32(lenValue)
   // 4. If len is 0, return -1.
-  if (len === 0) return -1
+  if (len === 0) {
+      return -1
+  }
   // 5. If argument fromIndex was passed let n be ToInteger(fromIndex); else let n be 0.
   var n = 0
-  if (fromIndex !== undefined) n = ToInteger(fromIndex)
+  if (fromIndex !== undefined) {
+      n = ToInteger(fromIndex)
+  }
   // 6. If n ≥ len, return -1.
-  if (n >= len) return -1
+  if (n >= len) {
+      return -1
+  }
   // 7. If n ≥ 0,then
   var k = 0
   if (n >= 0) {
@@ -468,7 +478,9 @@ map["Array.prototype.indexOf"] = function(searchElement, fromIndex) {
       // searchElement and elementK.
       var same = searchElement === elementK
       // iii. If same is true, return k.
-      if (same) return k
+      if (same) {
+          return k
+      }
     }
     // c. Increase k by 1.
     k++
@@ -486,16 +498,24 @@ map["Array.prototype.lastIndexOf"] = function(searchElement, fromIndex) {
   // 3. Let len be ToUint32(lenValue).
   var len = ToUint32(lenValue)
   // 4. If len is 0, return -1.
-  if (len === 0) return -1
+  if (len === 0) {
+      return -1
+  }
   // 5. If argument fromIndex was passed let n be ToInteger(fromIndex); else let n be len-1.
   var n = len - 1
-  if (fromIndex !== undefined) n = ToInteger(fromIndex)
+  if (fromIndex !== undefined) {
+      n = ToInteger(fromIndex)
+  }
   // 6. If n ≥ 0, then let k be min(n,len–1).
   var k = 0
-  if (n >= 0) k = Math.min(n, len - 1)
+  if (n >= 0) {
+      k = Math.min(n, len - 1)
+  }
   // 7. Else,n<0
   // a. Let k be len - abs(n).
-  else k = len - Math.abs(n)
+  else {
+      k = len - Math.abs(n)
+  }
   // 8. Repeat, while k≥ 0
   while (k >= 0) {
     // a. Let kPresent be the result of calling the [[HasProperty]] internal method of O with argument ToString(k).
@@ -509,10 +529,12 @@ map["Array.prototype.lastIndexOf"] = function(searchElement, fromIndex) {
       // searchElement and elementK.
       var same = searchElement === elementK
       // iii. If same is true, return k.
-      if (same) return k
+      if (same) {
+          return k
+      }
     }
     // c. Decrease k by 1.
-    k++
+    k--
   }
   // 9. Return -1.
   return -1
