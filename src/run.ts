@@ -31,6 +31,7 @@ import Recorder = require('./Recorder')
 import StructureInference = require('./StructureInference')
 import TestGen = require('./TestGen')
 import Score = require('./Score')
+import InputGen = require('./InputGen')
 var fs = require('fs')
 
 var log = Util.log
@@ -80,6 +81,7 @@ if (dataList == undefined) {
 var functionList = dataList.map(parseFunction)
 
 var config = new Search.SearchConfig()
+InputGen.config = config
 
 
 var inputSet = functionList.reduce(generateInputSet, [])
@@ -127,7 +129,7 @@ function parseFunction (e) {
     var thisVal = Random.pickN([-1], 1)[0]
     if (thisVal == -1) {
       var t = []
-      for (var j = 0; j < 5; j++) {
+      for (var j = 0; j < 10; j++) {
         t.push(Random.pickN([0, 1, -1, Infinity, -Infinity, "b", "def", true, false], 1)[0])
       }
       thisValArr.push(t)

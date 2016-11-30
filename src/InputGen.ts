@@ -20,12 +20,15 @@
 import Data = require('./Data')
 import Recorder = require('./Recorder')
 import StructureInference = require('./StructureInference')
+import Compile = require('./Compile')
+import Metric = require('./Metric')
 
 import Util = require('./util/Util')
 import Random = require('./util/Random')
 var log = Util.log
 var print = Util.print
 var line = Util.line
+export var config = null
 
 import Ansi = require('./util/Ansicolors')
 
@@ -140,6 +143,8 @@ function generateInputsAux(f: (...a: any[]) => any, initials: any[][], exprs: Da
         var res: any[][] = []
         var p = ps[0]
         var rest = helper(ps.slice(1))
+        var lookup = new Map<number, Object[]>()
+        var categories = []
         for (var j = 0; j < rest.length; j++) {
             var r = rest[j]
 
@@ -153,7 +158,6 @@ function generateInputsAux(f: (...a: any[]) => any, initials: any[][], exprs: Da
 
             var init = p.eval(r)
             var vals = generate(init, 3)
-
             for (var i = 0; i < vals.length; i++) {
 
                 // skip if the update would be a noop
@@ -162,8 +166,16 @@ function generateInputsAux(f: (...a: any[]) => any, initials: any[][], exprs: Da
                 }
 
                 var nr = Util.clone(r)
-                p.update(nr, vals[i])
-                res.push(nr)
+
+                var trace = Recorder.record(f, nr)
+                var pr = Compile.compileTrace(trace, null)
+                var category = trace.events.length*1000 + Metric.evaluate(pr, [nr], [trace], config)
+                if (!lookup.has(category)) {
+                    lookup.set(category, [])
+                    categories.push(category)
+                  p.update(nr, vals[i])
+                  res.push(nr)
+                }
             }
         }
         return res

@@ -23,13 +23,20 @@ export function test(f, args: any) {
     var fstr = whileUnroll(f.toString(), 2)
     var fsplit = fstr.split(/{/)
     var len = fsplit.length
+    var scoreLen = 0
 
-    var newfstr = fsplit[0] + '{' + fsplit[1]
-    for (var i = 0; i < len - 2; i++) {
-        newfstr += '{\n_score[' + i + '] = 1;\n' + fsplit[i + 2]
+    var newfstr = fsplit[0]
+    for (var i = 1; i < len; i++) {
+        if ((fsplit[i-1].search('if') == -1) && (fsplit[i-1].search('else') == -1) && (fsplit[i-1].search('while') == -1) && (fsplit[i-1].search('for') == -1)) {
+            newfstr += '{' + fsplit[i]
+        } else {
+            newfstr += '{\n_score[' + scoreLen + '] = 1;\n' + fsplit[i]
+            scoreLen += 1
+        }
     }
+    console.log(newfstr)
 
-    var _score = new Array(len - 2)
+    var _score = new Array(scoreLen)
 
     var newFunc = eval('[' + newfstr + ']')[0]
     for (var i = 0; i < args.length; i++) {
@@ -40,14 +47,14 @@ export function test(f, args: any) {
     }
 
     var scoreNum = 0
-    for (var i = 0; i < len - 2; i++) {
+    for (var i = 0; i < scoreLen; i++) {
         if (_score[i] == 1) {
             scoreNum++
         }
-            // console.log('score[' + i + '] = ' + _score[i])
+             console.log('score[' + i + '] = ' + _score[i])
     }
 
-    return scoreNum / (len - 2)
+    return scoreNum / scoreLen
 }
 
 export function whileUnroll(fstr, depth) {
@@ -119,3 +126,5 @@ var ToNumber = Builtin.ToNumber
 var ToInt32 = Builtin.ToInt32
 var ToUint32 = Builtin.ToUint32
 var HasProperty = Builtin.HasProperty
+var ToInteger = Builtin.ToInteger
+var DefineOwnProperty = Builtin.DefineOwnProperty

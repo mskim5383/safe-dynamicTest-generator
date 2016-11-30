@@ -84,6 +84,7 @@ export function search(f: (...a: any[]) => any, args: any[][], config: SearchCon
     var categories = InputGen.categorize(inputs, traces, loop)
     if (config.debug) Ansi.Gray("Found " + categories.length + " categories of inputs.")
 
+
     var realTraces = inputs.map((i) => Recorder.record(f, i))
 
     var t = Recorder.record(f, inputs[0])
