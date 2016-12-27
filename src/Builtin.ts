@@ -1,5 +1,3 @@
-"use strict"
-
 export function getFunction(fName) {
   return map[fName]
 }

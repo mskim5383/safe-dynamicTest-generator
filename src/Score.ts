@@ -1,4 +1,3 @@
-"use strict"
 
 import Builtin = require('./Builtin')
 import Ansi = require('./util/Ansicolors')
@@ -34,7 +33,7 @@ export function test(f, args: any) {
             scoreLen += 1
         }
     }
-    console.log(newfstr)
+     console.log(newfstr)
 
     var _score = new Array(scoreLen)
 
@@ -43,7 +42,13 @@ export function test(f, args: any) {
         var arg = args[i]
         var thisVal = arg.thisVal
         var argument = arg.args
-        newFunc.apply(thisVal, argument)
+        try {
+          newFunc.apply(thisVal, argument)
+        } catch (err) {
+          // TODO
+          console.log("runtime error")
+          throw err
+        }
     }
 
     var scoreNum = 0

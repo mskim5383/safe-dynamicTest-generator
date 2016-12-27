@@ -2,7 +2,7 @@
 // TODO extend it for functions.
 // TODO extend it for non-pure function.
 // TODO handling exception case.
-export function jsonGen(func, thisVal, args, filename="") {
+export function jsonGen(func, thisVal, args, name="") {
     // type checks
     if (typeof func !== "function") err("'func' should have a function type.");
     if (!Array.isArray(args)) err("'args' should have an array type.");
@@ -33,7 +33,7 @@ export function jsonGen(func, thisVal, args, filename="") {
     // generate output
     var result = func.apply(thisVal, args);
     var output = {
-        "value": convert(result),
+        "value": convert(result, true, name),
         "heap": getHeap()
     };
 
@@ -45,13 +45,10 @@ export function jsonGen(func, thisVal, args, filename="") {
 
     // display or download the final JSON
     var data = JSON.stringify(json, null, 4);
-    if (filename) {
-    } else {
-        return data;
-    }
+    return data;
 
     // covert to possible formats
-    function convert(value) {
+    function convert(value, isOutput = false, name = "") {
         var type = typeof value;
         if (type === 'undefined') {
             return '@undef';
@@ -71,7 +68,15 @@ export function jsonGen(func, thisVal, args, filename="") {
                 var loc = find(value, predefLocs);
                 if (loc === null) loc = find(value, record);
                 if (loc === null) {
-                    loc = '#' + (++addr_count);
+                    if (isOutput) {
+                        if (value instanceof Array) {
+                            type = "array"
+                        }
+                        loc = '#' + name + "<" + type + ">"
+                    }
+                    else {
+                        loc = '#' + (++addr_count);
+                    }
                     record[loc] = value;
                     var props = Object.getOwnPropertyNames(value);
                     for (var i = 0; i < props.length; i++){

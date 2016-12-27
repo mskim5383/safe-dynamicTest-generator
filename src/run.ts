@@ -19,7 +19,6 @@
  * @author Stefan Heule <stefanheule@gmail.com>
  */
 
-"use strict"
 
 import main = require('./main')
 import Util = require('./util/Util')
@@ -126,10 +125,11 @@ function parseFunction (e) {
   // }
 
   for (var i = 0; i < 10; i++) {
-    var thisVal = Random.pickN([-1], 1)[0]
-    if (thisVal == -1) {
+    var thisVal = Random.pickN([1, true, 'def', -1], 1)[0]
+    //if (thisVal == -1) {
+    if (true) {
       var t = []
-      for (var j = 0; j < 10; j++) {
+      for (var j = 0; j < Random.randInt(6, 10); j++) {
         t.push(Random.pickN([0, 1, -1, Infinity, -Infinity, "b", "def", true, false], 1)[0])
       }
       thisValArr.push(t)
@@ -164,9 +164,9 @@ function parseFunction (e) {
   // }
   //
 
-  for (var i = 0; i < 5; i++) {
+  for (var i = 0; i < 10; i++) {
     var arg = Util.clone(Random.pickN(thisValArr, 1))
-    for (var j = 0; j < f.length; j++) {
+    for (var j = 0; j < f.length + Random.randInt(3); j++) {
       arg.push(Random.pickN([0, 1, -1, Infinity, -Infinity, "b", "def", true, false], 1)[0])
     }
     args.push(arg)
@@ -183,6 +183,7 @@ function parseFunction (e) {
 }
 
 function generateInputSet (inputSet, e) {
+  console.time(e.name)
   e['inputs'] = []
   var inputs = Search.search(e['function'], e['args'], config)
   for (var i = 0; i < inputs.length; i++) {
@@ -190,13 +191,20 @@ function generateInputSet (inputSet, e) {
     e.inputs.push({'thisVal': input[0], 'args': input.slice(1)})
   }
   inputSet.push(e)
+  console.timeEnd(e.name)
   return inputSet
 }
 
 function generateJson (test) {
   for (var i = 0; i < test.inputs.length; i++) {
     var input = test.inputs[i]
-    var testJsonSAFE = TestGen.jsonGen(test['f'], input['thisVal'], input['args'])
+    var testJsonSAFE
+    try {
+      testJsonSAFE = TestGen.jsonGen(test['f'], input['thisVal'], input['args'], test['name'])
+    } catch (err) {
+      // TODO
+      testJsonSAFE = {'error': true}
+    }
     var testJson = {'name': test.name, 'thisVal': input.thisVal, 'args': input.args}
     input.json = testJsonSAFE
     input.testJson = testJson
@@ -221,6 +229,10 @@ function saveTests (tests_path, test) {
   for (var i = 0; i < inputs.length; i++) {
     var json_name = name + '_' + i + '.json'
     var input = inputs[i]
+    if (input.json.error) {
+      // TODO
+      continue
+    }
     tests.push(input.testJson)
     try {
       fs.writeFileSync(test_path + json_name, input.json)

@@ -1,9 +1,9 @@
 {
   "function-list": [
     {
-      "name": "Array.prototype.pop",
-      "function-body": "Array.prototype.pop",
-      "thisVal": "[1, 2, 3]",
+      "name": "Array.prototype.reverse",
+      "function-body": "Array.prototype.reverse",
+      "thisVal": "[1, 2, 3, 4]",
       "args": ""
     }
   ]

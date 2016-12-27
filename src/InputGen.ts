@@ -66,6 +66,7 @@ export function generate(init: any, n: number): any[] {
                     res.push(onemore)
                 }
             }
+
             return res
         }
         return []
